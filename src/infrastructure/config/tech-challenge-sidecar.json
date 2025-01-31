@@ -1,0 +1,134 @@
+// {
+// 	"info": {
+// 		"_postman_id": "55582c39-2f5b-4978-a40c-84ad3e47f8ed",
+// 		"name": "Tech-Challenge-Sidecar",
+// 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+// 		"_exporter_id": "11088853"
+// 	},
+// 	"item": [	
+// 		{
+// 			"name": "Campaign",
+// 			"item": [
+// 				{
+// 					"name": "01",
+// 					"request": {
+// 						"method": "POST",
+// 						"header": [],
+// 						"body": {
+// 							"mode": "raw",
+// 							"raw": "{\n  \"name\": \"Primeiro pedido\",\n  \"campaignRule\": \"Clientes cadastrados que não possuam nenhum pedido\",\n  \"discount\": \"10\",\n  \"endDate\": \"2030-12-30\"\n}",
+// 							"options": {
+// 								"raw": {
+// 									"language": "json"
+// 								}
+// 							}
+// 						},
+// 						"url": {
+// 							"raw": "{{API_ADDRESS}}/campaign/create",
+// 							"host": [
+// 								"{{API_ADDRESS}}"
+// 							],
+// 							"path": [
+// 								"campaign",
+// 								"create"
+// 							]
+// 						}
+// 					},
+// 					"response": []
+// 				}
+// 			]
+// 		},
+// 		{
+// 			"name": "Campaign Customer",
+// 			"item": [
+// 				{
+// 					"name": "01",
+// 					"request": {
+// 						"method": "POST",
+// 						"header": [],
+// 						"body": {
+// 							"mode": "raw",
+// 							"raw": "{\n  \"campaignId\": 1,\n  \"customerId\": 1\n}",
+// 							"options": {
+// 								"raw": {
+// 									"language": "json"
+// 								}
+// 							}
+// 						},
+// 						"url": {
+// 							"raw": "{{API_ADDRESS}}/campaign/customer/association/create",
+// 							"host": [
+// 								"{{API_ADDRESS}}"
+// 							],
+// 							"path": [
+// 								"campaign",
+// 								"customer",
+// 								"association",
+// 								"create"
+// 							]
+// 						}
+// 					},
+// 					"response": []
+// 				},
+// 				{
+// 					"name": "02",
+// 					"request": {
+// 						"method": "POST",
+// 						"header": [],
+// 						"body": {
+// 							"mode": "raw",
+// 							"raw": "{\n  \"campaignId\": 1,\n  \"customerId\": 2\n}",
+// 							"options": {
+// 								"raw": {
+// 									"language": "json"
+// 								}
+// 							}
+// 						},
+// 						"url": {
+// 							"raw": "{{API_ADDRESS}}/campaign/customer/association/create",
+// 							"host": [
+// 								"{{API_ADDRESS}}"
+// 							],
+// 							"path": [
+// 								"campaign",
+// 								"customer",
+// 								"association",
+// 								"create"
+// 							]
+// 						}
+// 					},
+// 					"response": []
+// 				}
+// 			]
+// 		}		
+// 	],
+// 	"event": [
+// 		{
+// 			"listen": "prerequest",
+// 			"script": {
+// 				"type": "text/javascript",
+// 				"packages": {},
+// 				"exec": [
+// 					""
+// 				]
+// 			}
+// 		},
+// 		{
+// 			"listen": "test",
+// 			"script": {
+// 				"type": "text/javascript",
+// 				"packages": {},
+// 				"exec": [
+// 					""
+// 				]
+// 			}
+// 		}
+// 	],
+// 	"variable": [
+// 		{
+// 			"key": "API_ADDRESS",
+// 			"value": "http://campaign-service:3001",
+// 			"type": "string"
+// 		}
+// 	]
+// }
