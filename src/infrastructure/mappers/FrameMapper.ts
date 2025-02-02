@@ -3,9 +3,9 @@ import { Frame } from "@entities/Frame";
 export class FrameMapper {
     static toEntity(frameModel: any): Frame {
         return new Frame(
+            frameModel.name,
             frameModel.videoId,
             frameModel.s3Key,
-            frameModel.name,
             frameModel.extension,
             frameModel.url,
             frameModel.id
