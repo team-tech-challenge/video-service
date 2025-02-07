@@ -27,6 +27,8 @@ WORKDIR /app
 # Copia apenas os artefatos necessários do estágio de build
 COPY --from=build /app /app
 
+RUN mkdir -p /app/temp && chmod -R 777 /app/temp
+
 # Expõe a porta em que sua aplicação rodará
 EXPOSE 3000
 

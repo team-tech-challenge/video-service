@@ -1,13 +1,13 @@
 export class Frame {
     private id?: number;
-    private fileName: string;
+    private name: string;
     private videoId: number;
     private s3Key: string;
     private extension: string;
     private url?: string;
   
     constructor(
-      fileName: string,
+      name: string,
       videoId: number,
       s3Key: string,
       extension: string,
@@ -16,7 +16,7 @@ export class Frame {
       
     ) {
       this.id = id;
-      this.fileName = fileName;
+      this.name = name;
       this.videoId = videoId;
       this.s3Key = s3Key;
       this.extension = extension;
@@ -28,7 +28,7 @@ export class Frame {
     }
   
     public getFileName(): string {
-      return this.fileName;
+      return this.name;
     }
   
     public getVideoId(): number {
@@ -51,8 +51,8 @@ export class Frame {
       this.id = id;
     }
   
-    public setFileName(fileName: string): void {
-      this.fileName = fileName;
+    public setFileName(name: string): void {
+      this.name = name;
     }
   
     public setVideoId(videoId: number): void {
@@ -70,5 +70,7 @@ export class Frame {
     public setUrl(url: string): void {
       this.url = url;
     }
+
+    
   }
   

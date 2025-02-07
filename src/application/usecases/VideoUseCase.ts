@@ -30,8 +30,8 @@ export class VideoUseCase {
 
             return savedVideo;
         } catch (error) {
-            console.error("Error uploading and saving video:", error);
-            throw new Error("Error processing video upload");
+            console.error("Erro ao enviar e salvar o vídeo:", error);
+            throw new Error("Erro ao processar upload do vídeo");
         }
     }
 	/**
@@ -49,8 +49,8 @@ export class VideoUseCase {
 
             return videos;
         } catch (error) {
-            console.error("Error fetching all videos:", error.message);
-            throw new Error("Unable to fetch videos");
+            console.error("Erro ao buscar todos os vídeos:", error.message);
+            throw new Error("Não foi possivel buscar os vídeos");
         }
     }
 	/**
@@ -70,8 +70,8 @@ export class VideoUseCase {
 
             return video;
         } catch (error) {
-            console.error(`Error fetching video with ID ${id}:`, error.message);
-            throw new Error("Unable to fetch video by ID");
+            console.error(`Erro ao buscar vídeo com id ${id}:`, error.message);
+            throw new Error("Não foi possivel buscar vídeo por ID");
         }
     }
 }

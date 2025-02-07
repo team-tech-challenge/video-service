@@ -1,11 +1,11 @@
+import { MediaConvertService } from "@external/aws/MediaConvertService";
+import { S3Service } from "@external/s3/S3Service"
 import { IFrameGateway } from "@gateways/IFrameGateway";
 import { IVideoGateway } from "@gateways/IVideoGateway";
-import { S3Service } from "@external/s3/S3Service";
-import { FrameMapper } from "@mappers/FrameMapper";
 import { Frame } from "@entities/Frame";
 import * as fs from "fs";
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegStatic from "ffmpeg-static";
+import path from "path";
+import archiver from "archiver";
 
 
 
@@ -13,92 +13,125 @@ export class FrameUseCase {
     constructor(
         private frameGateway: IFrameGateway,
         private videoGateway: IVideoGateway,
-        private s3Service: S3Service
-    ) {
-        if (ffmpegStatic) {
-            ffmpeg.setFfmpegPath(ffmpegStatic); // Define o caminho do FFmpeg estático
-        } else {
-            console.error("FFmpeg não encontrado!");
-            throw new Error("FFmpeg não encontrado. Verifique a instalação do ffmpeg-static.");
-        }
-    }
+        private s3Service: S3Service,
+        private mediaConvertService: MediaConvertService
+    ) {}
 
     async extractFramesFromVideo(videoId: number): Promise<Frame[]> {
         const video = await this.videoGateway.getVideoById(videoId);
-    
         if (!video) {
-            throw new Error("Video not found");
+            throw new Error("Vídeo não encontrado.");
+        }        
+        const inputS3Key = `s3://${process.env.S3_BUCKET_NAME}/${video.getS3Key()}`;
+        const outputS3KeyFrame = `s3://${process.env.S3_BUCKET_NAME}/frames/video_${videoId}/`;
+
+        console.log("Iniciando extração de frames...");
+        const jobId = await this.mediaConvertService.createFrameExtractionJob(inputS3Key, outputS3KeyFrame);
+
+        console.log(`Monitorando Job ID: ${jobId}`);
+        let status = await this.mediaConvertService.checkJobStatus(jobId);
+
+        while (status === "SUBMITTED" || status === "PROGRESSING") {
+            console.log(`Status do processamento: ${status}`);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            status = await this.mediaConvertService.checkJobStatus(jobId);
         }
-    
-        if (!video.getS3Key()) {
-            throw new Error("Video does not have a valid S3 key");
+
+        if (status !== "COMPLETE") {
+            throw new Error(`Falha na extração de frames. Status final: ${status}`);
         }
-    
-        const extractedFrames: Frame[] = [];
-        const outputFolder = `temp/frames/video_${videoId}`; // Pasta temporária local para frames
-    
-        // Criar a pasta temporária se não existir
-        if (!fs.existsSync(outputFolder)) {
-            fs.mkdirSync(outputFolder, { recursive: true });
-        }
-    
-        // Fazer o download do vídeo do S3
-        const videoFilePath = `${outputFolder}/video.mp4`; // Nome temporário para o vídeo
-        await this.s3Service.downloadFile(video.getS3Key(), videoFilePath);
-    
-        // Usando ffmpeg para extrair frames
-        return new Promise((resolve, reject) => {
-            ffmpeg(videoFilePath) // Agora utilizando o arquivo baixado do S3            
-                .on("end", async () => {
-                    try {
-                        // Define o caminho do binário do FFmpeg para o fluent-ffmpeg
-                        
-                        const frameFiles = fs.readdirSync(outputFolder); // Lista os arquivos extraídos
-    
-                        for (const fileName of frameFiles) {
-                            const filePath = `${outputFolder}/${fileName}`;
-                            const s3Key = `frames/video_${videoId}/${fileName}`;
-    
-                            // Upload do frame ao S3
-                            const s3Url = await this.s3Service.uploadFile(s3Key, fs.createReadStream(filePath), "image/jpeg");
-    
-                            // Criar instância do Frame
-                            const frame = new Frame(fileName, videoId, s3Key, "jpg");
-                            frame.setUrl(s3Url);
-    
-                            // Salvar o frame no banco de dados
-                            await this.frameGateway.saveFrame(frame);
-                            extractedFrames.push(frame);
-                        }
-    
-                        // Limpar a pasta temporária
-                        fs.rmdirSync(outputFolder, { recursive: true });
-                        resolve(extractedFrames);
-                    } catch (err) {
-                        console.error("Error processing frames:", err);
-                        reject(err);
-                    }
-                })
-                .on("error", (err) => {
-                    console.error("Error during frame extraction:", err);
-                    reject(err);
-                })
-                .save(`${outputFolder}/frame-%03d.jpg`);
+
+        console.log("Frames extraídos, listando arquivos...");
+
+        const outputS3KeyExtract = `frames/video_${videoId}/`;
+        const frameUrls = await this.mediaConvertService.listExtractedFrames(outputS3KeyExtract);
+
+        const extractedFrames: Frame[] = frameUrls.map((frameUrl, index) => {
+            return new Frame(
+                `frame-${index}.jpg`,
+                videoId,
+                frameUrl.key,
+                "jpg",
+                frameUrl.url,
+            );
         });
+
+        // Salvar frames no banco
+        for (const frame of extractedFrames) {
+            await this.frameGateway.saveFrame(frame);
+        }
+
+        return extractedFrames;
+    }      
+
+    async getFramesByVideoId(videoId: number): Promise<Frame[]> {     
+        const video = await this.videoGateway.getVideoById(videoId);
+        if (!video) {
+            throw new Error("Vídeo não encontrado.");
+        }        
+        const outputS3KeyPrefix = `frames/video_${videoId}/`;
+
+        const frameUrls = await this.mediaConvertService.listExtractedFrames(outputS3KeyPrefix);
+        
+        const extractedFrames: Frame[] = frameUrls.map((frameUrl, index) => {
+            return new Frame(
+                `frame-${index}.jpg`,
+                videoId,
+                frameUrl.key,
+                "jpg",
+                frameUrl.url,
+            );
+        });
+
+        return extractedFrames;
     }
 
-    async getFramesByVideoId(videoId: number): Promise<Frame[]> {
+    async downloadFramesAsZip(videoId: number): Promise<string> {
         if (!videoId) {
-            throw new Error("Video ID is required");
+            throw new Error("Video ID é obrigatorio");
         }
 
-        // Busca todos os frames associados ao vídeo pelo videoId
+        // Busca todos os frames associados ao vídeo
         const frames = await this.frameGateway.getFramesByVideoId(videoId);
 
         if (!frames || frames.length === 0) {
-            throw new Error("No frames found for the provided video ID");
+            throw new Error("Nenhum frame encontrado para o video");
         }
 
-        return frames;
+        const tempDir = path.join("/app", "temp");
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+            fs.chmodSync(tempDir, 0o777); // Permissão total (somente dentro do container)
+        }
+
+        // Criando diretório temporário para armazenar os frames
+        const framesFolder = path.join(tempDir, `frames_video_${videoId}`);
+        if (!fs.existsSync(framesFolder)) {
+            fs.mkdirSync(framesFolder, { recursive: true });
+        }
+
+        // Baixa cada frame do S3 para a pasta temporária
+        for (const frame of frames) {
+            const framePath = path.join(framesFolder, frame.getFileName());
+            await this.s3Service.downloadFile(frame.getS3Key(), framePath);
+        }
+
+        // Criando um arquivo ZIP
+        const zipFilePath = path.join(tempDir, `video_${videoId}_frames.zip`);
+        const output = fs.createWriteStream(zipFilePath);
+        const archive = archiver("zip", { zlib: { level: 9 } });
+
+        return new Promise((resolve, reject) => {
+            output.on("close", () => {
+                console.log(`Arquivo ZIP criado: ${zipFilePath}`);
+                resolve(zipFilePath);
+            });
+
+            archive.on("error", (err) => reject(err));
+
+            archive.pipe(output);
+            archive.directory(framesFolder, false);
+            archive.finalize();
+        });
     }
 }

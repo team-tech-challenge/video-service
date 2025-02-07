@@ -1,17 +1,17 @@
 export class Video {
     private id?: number;
     private idUser: number;
-    private fileName: string;
+    private name: string;
     private s3Key: string;
     private extension: string;
     private url?: string;
 
-    constructor(idUser: number, fileName: string, s3Key: string, extension: string, url?: string, id?: number) {
+    constructor(idUser: number, name: string, s3Key: string, extension: string, url?: string, id?: number) {
         this.id = id;
         this.idUser = idUser;
-        this.fileName = fileName;
+        this.name = name;
         this.s3Key = s3Key;
-        this.s3Key = url;
+        this.url = url;
         this.extension = extension;
     }
 
@@ -24,7 +24,7 @@ export class Video {
     }
     
     public getFileName(): string {
-        return this.fileName;
+        return this.name;
     }    
     
     public getS3Key(): string {
@@ -47,8 +47,8 @@ export class Video {
         this.idUser = idUser;
     }
 
-    public setFileName(fileName: string): void {
-        this.fileName = fileName;
+    public setFileName(name: string): void {
+        this.name = name;
     }  
 
     public setS3Key(s3Key: string): void {
@@ -61,5 +61,10 @@ export class Video {
 
     public setUrl(url: string): void {
         this.url = url;
+    }
+    
+    public getFileNameWithoutExtension(): string {
+        const name = this.s3Key.split("/").pop() || ""; // Pega apenas o nome do arquivo
+        return name.replace(/\.[^/.]+$/, ""); // Remove a extensão
     }
 }

@@ -33,7 +33,7 @@ const videoController = new VideoController(videoUseCase);
  * @swagger
  * /videos/upload:
  *   post:
- *     summary: Faz o upload de um vídeo
+ *     summary: Faz o upload de um ou mais vídeos
  *     tags: [Videos]
  *     requestBody:
  *       required: true
@@ -42,18 +42,21 @@ const videoController = new VideoController(videoUseCase);
  *           schema:
  *             type: object
  *             properties:
- *               file:
- *                 type: string
- *                 format: binary
+ *               files:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 description: Arquivos de vídeo a serem enviados
  *     responses:
  *       201:
- *         description: Vídeo enviado com sucesso
+ *         description: Vídeos enviados com sucesso
  *       400:
  *         description: Nenhum arquivo enviado
  *       500:
  *         description: Erro no servidor
  */
-videoRoute.post("/upload", upload.single("file"), (req, res) =>
+videoRoute.post("/upload", upload.array("files", 10), (req, res) =>
     videoController.uploadVideos(req, res)
 );
 

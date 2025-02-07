@@ -10,7 +10,7 @@ export class VideoAdapter implements IVideoGateway {
     }
 
     async getVideoById(id: number): Promise<Video | null> {
-        const videoModel = await VideoModel.findByPk(id);
+        const videoModel = await VideoModel.findByPk(id);        
         return videoModel ? VideoMapper.toEntity(videoModel) : null;
     }
 
