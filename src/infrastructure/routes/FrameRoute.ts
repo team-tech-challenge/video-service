@@ -123,7 +123,7 @@ router.post("/frames/extract", (req, res) =>
  *                         example: 1
  *                       downloadUrl:
  *                         type: string
- *                         example: "http://localhost:3000/frames/video/1/download-frames"
+ *                         example: "http://video-service:3000/frames/video/1/download-frames"
  *       400:
  *         description: Nenhum vídeo foi especificado na requisição
  *       404:

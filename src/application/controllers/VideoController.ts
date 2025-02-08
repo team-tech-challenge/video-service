@@ -1,12 +1,26 @@
 import { Request, Response } from "express";
 import { VideoUseCase } from "@usecases/VideoUseCase";
 import { Video } from "@entities/Video";
+import { searchUser } from "@external/api/User";
 
 export class VideoController {
     constructor(private videoUseCase: VideoUseCase) {}
 
     async uploadVideos(req: Request, res: Response): Promise<void> {
         const files = req.files as Express.Multer.File[];
+        const {userId} = req.body;
+
+        if (!userId) {
+            res.status(400).json({ message: "Nenhum usuário encontrato" });
+            return;
+        }
+
+        const user = await searchUser(userId)
+        
+        if (!user) {
+            res.status(400).json({ message: "Nenhum usuário encontrato" });
+            return;
+        }
     
         if (!files || files.length === 0) {
             res.status(400).json({ message: "Nenhum arquivo fornecido" });
@@ -22,7 +36,7 @@ export class VideoController {
                     const video = new Video(null, file.originalname, file.path, file.mimetype);
                     
                     // Salvar e processar o vídeo
-                    const savedVideo = await this.videoUseCase.uploadAndSaveVideo(file.path, video);
+                    const savedVideo = await this.videoUseCase.uploadAndSaveVideo(file.path, video, user.id);
                     
                     uploadedVideos.push(savedVideo);
                 } catch (error) {

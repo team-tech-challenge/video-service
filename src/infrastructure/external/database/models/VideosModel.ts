@@ -28,8 +28,7 @@ export class VideoModel extends Model {
 	
 	@Column({
 		type: DataType.STRING,
-		allowNull: false,
-		unique: true,
+		allowNull: false,		
 	})
 	name: string;
 	

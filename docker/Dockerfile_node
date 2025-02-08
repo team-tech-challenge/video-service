@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=build /app /app
 
 # Expõe a porta em que sua aplicação rodará
-EXPOSE 3002
+EXPOSE 3000
 
 # Comando para iniciar o servidor Node.js
 ENTRYPOINT ["npm"]

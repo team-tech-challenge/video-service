@@ -1,4 +1,5 @@
 import { S3Service } from "@external/s3/S3Service";
+import { searchUser } from "@external/api/User"
 import { IVideoGateway } from "@gateways/IVideoGateway";;
 import { Video } from "@entities/Video";
 import * as fs from "fs";
@@ -9,19 +10,20 @@ export class VideoUseCase {
         private s3Service: S3Service
     ) {}
 
-    async uploadAndSaveVideo(filePath: string, video: Video): Promise<Video> {
+    async uploadAndSaveVideo(filePath: string, video: Video, userId: number): Promise<Video> {
         try {
+            
             // Lê o arquivo de vídeo como stream
             const fileStream = fs.createReadStream(filePath);
 
             // Gera a chave do S3
-            const s3Key = `videos/${video.getFileName()}`;
+            const s3Key = `videos/${userId}/${video.getFileName()}`;
 
             // Envia o arquivo para o S3
             const videoUrl = await this.s3Service.uploadFile(s3Key, fileStream, "video/mp4");
 
             // Define as informações no objeto Video
-			video.setIdUser(1)
+			video.setIdUser(userId)
             video.setS3Key(s3Key);
             video.setUrl(videoUrl);
 

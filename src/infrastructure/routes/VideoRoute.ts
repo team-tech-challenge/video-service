@@ -14,7 +14,7 @@ const upload = multer({ dest: "uploads/" });
 
 // Instâncias necessárias
 const videoAdapter = new VideoAdapter();
-const s3Service = new S3Service('fiap-video-frame');
+const s3Service = new S3Service(process.env.S3_BUCKET_NAME);
 
 // Instância do UseCase
 const videoUseCase = new VideoUseCase(videoAdapter, s3Service);
@@ -42,17 +42,38 @@ const videoController = new VideoController(videoUseCase);
  *           schema:
  *             type: object
  *             properties:
+ *               userId:
+ *                 type: integer
+ *                 example: 123
+ *                 description: ID do usuário enviando o vídeo
  *               files:
  *                 type: array
  *                 items:
  *                   type: string
  *                   format: binary
  *                 description: Arquivos de vídeo a serem enviados
+ *     parameters:
+ *       - in: formData
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 123
+ *         description: ID do usuário que está enviando os vídeos
+ *       - in: formData
+ *         name: files
+ *         required: true
+ *         description: Arquivos de vídeo a serem enviados
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *             format: binary 
  *     responses:
  *       201:
  *         description: Vídeos enviados com sucesso
  *       400:
- *         description: Nenhum arquivo enviado
+ *         description: Nenhum arquivo enviado ou userId ausente
  *       500:
  *         description: Erro no servidor
  */

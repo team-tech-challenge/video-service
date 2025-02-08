@@ -9,9 +9,9 @@ const doc = {
 	},
 	servers: [
 		{
-			url: "http://localhost:3000",
+			url: "http://video-service:3000",
 		},
-	],	
+	]	
 };
 
 const outputFile = "./swagger-output.json";
