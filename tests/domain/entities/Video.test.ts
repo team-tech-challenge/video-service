@@ -50,14 +50,53 @@ describe("Video class", () => {
 		});
 	});
 
-	describe("File Name Processing", () => {
-		it("should return the file name without extension from full path", () => {
-			expect(video.getFileNameWithoutExtension()).toBe("testVideo");
+	describe('getFileNameWithoutExtension', () => {
+		it('should return the file name without the extension', () => {
+			const video = new Video(null, 'video.mp4', '/path/to/video.mp4', 'video/mp4');
+
+			// Testa o nome do arquivo sem extensão
+			const fileNameWithoutExtension = video.getFileNameWithoutExtension();
+			expect(fileNameWithoutExtension).toBe('video');
 		});
 
-		it("should return the file name without extension when there is no path", () => {
-			const videoNoPath = new Video(2, "simpleVideo", "videoOnly.avi", "avi");
-			expect(videoNoPath.getFileNameWithoutExtension()).toBe("videoOnly");
+		it('should handle file name with multiple dots', () => {
+			const video = new Video(null, 'movie.name.final.mp4', '/path/to/movie.name.final.mp4', 'video/mp4');
+
+			// Testa um nome de arquivo com vários pontos
+			const fileNameWithoutExtension = video.getFileNameWithoutExtension();
+			expect(fileNameWithoutExtension).toBe('movie.name.final');
+		});
+
+		it('should return an empty string if there is no file name', () => {
+			const video = new Video(null, '', '/path/to/', 'video/mp4');
+
+			// Testa se não há nome de arquivo
+			const fileNameWithoutExtension = video.getFileNameWithoutExtension();
+			expect(fileNameWithoutExtension).toBe('');
+		});
+
+		it('should return the file name without extension even if the path contains directories', () => {
+			const video = new Video(null, 'folder/video.mp4', '/path/to/folder/video.mp4', 'video/mp4');
+
+			// Testa um caminho com diretórios
+			const fileNameWithoutExtension = video.getFileNameWithoutExtension();
+			expect(fileNameWithoutExtension).toBe('video');
+		});
+
+		it('should return the file name as it is when there is no extension', () => {
+			const video = new Video(null, 'video', '/path/to/video', 'video/mp4');
+
+			// Testa o caso sem extensão
+			const fileNameWithoutExtension = video.getFileNameWithoutExtension();
+			expect(fileNameWithoutExtension).toBe('video');
+		});
+
+		it('should return an empty string if s3Key is empty', () => {
+			const video = new Video(null, '', '', 'video/mp4');
+
+			// Testa o caso com chave S3 vazia
+			const fileNameWithoutExtension = video.getFileNameWithoutExtension();
+			expect(fileNameWithoutExtension).toBe('');
 		});
 	});
 
