@@ -5,6 +5,7 @@ import { VideoController } from "@controllers/VideoController";
 import { VideoUseCase } from "@usecases/VideoUseCase";
 import { VideoAdapter } from "@adapters/VideoAdapter";
 import { S3Service } from "@external/s3/S3Service";
+import { EmailService } from "@external/email/EmailService";
 
 
 export const videoRoute = express.Router();
@@ -15,9 +16,10 @@ const upload = multer({ dest: "uploads/" });
 // Instâncias necessárias
 const videoAdapter = new VideoAdapter();
 const s3Service = new S3Service(process.env.S3_BUCKET_NAME);
+const emailService = new EmailService();
 
 // Instância do UseCase
-const videoUseCase = new VideoUseCase(videoAdapter, s3Service);
+const videoUseCase = new VideoUseCase(videoAdapter, s3Service, emailService);
 
 // Instância do Controller
 const videoController = new VideoController(videoUseCase);

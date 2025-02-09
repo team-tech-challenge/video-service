@@ -6,6 +6,8 @@ import { Frame } from "@entities/Frame";
 import * as fs from "fs";
 import path from "path";
 import archiver from "archiver";
+import { searchUser } from "@external/api/User";
+import { EmailService } from "@external/email/EmailService";
 
 
 
@@ -14,14 +16,23 @@ export class FrameUseCase {
         private frameGateway: IFrameGateway,
         private videoGateway: IVideoGateway,
         private s3Service: S3Service,
-        private mediaConvertService: MediaConvertService
+        private mediaConvertService: MediaConvertService,
+        private emailService: EmailService
     ) {}
 
     async extractFramesFromVideo(videoId: number): Promise<Frame[]> {
         const video = await this.videoGateway.getVideoById(videoId);
         if (!video) {
             throw new Error("Vídeo não encontrado.");
-        }        
+        }  
+        
+        const user = await searchUser(video.getIdUser())
+        // Enviar e-mail de notificação para o usuário
+        await this.emailService.sendEmail(
+            user.username,
+            "Processo de extração de frame",
+            `O processo de extração de frame "${video.getFileName()}" foi iniciado.`
+        );    
         const inputS3Key = `s3://${process.env.S3_BUCKET_NAME}/${video.getS3Key()}`;
         const outputS3KeyFrame = `s3://${process.env.S3_BUCKET_NAME}/frames/video_${videoId}/`;
 
@@ -61,6 +72,13 @@ export class FrameUseCase {
             await this.frameGateway.saveFrame(frame);
         }
 
+        // Enviar e-mail de notificação para o usuário
+        await this.emailService.sendEmail(
+            user.username,
+            "Processo de extração de frame",
+            `O processo de extração de frame "${video.getFileName()}" foi finalizado.`
+        );  
+
         return extractedFrames;
     }      
 
@@ -90,6 +108,18 @@ export class FrameUseCase {
         if (!videoId) {
             throw new Error("Video ID é obrigatorio");
         }
+        const video = await this.videoGateway.getVideoById(videoId);
+        if (!video) {
+            throw new Error("Vídeo não encontrado.");
+        }  
+
+        const user = await searchUser(video.getIdUser())
+        // Enviar e-mail de notificação para o usuário
+        await this.emailService.sendEmail(
+            user.username,
+            "Processo de zip de frames",
+            `O processo de criação de zip de frames "${video.getFileName()}" foi iniciado.`
+        );
 
         // Busca todos os frames associados ao vídeo
         const frames = await this.frameGateway.getFramesByVideoId(videoId);
@@ -132,6 +162,14 @@ export class FrameUseCase {
             archive.pipe(output);
             archive.directory(framesFolder, false);
             archive.finalize();
+
+            // Enviar e-mail de notificação para o usuário
+            this.emailService.sendEmail(
+                user.username,
+                "Processo de zip de frames",
+                `O processo de criação de zip de frames "${video.getFileName()}" foi finalizado.`
+            );
+            
         });
     }
 }

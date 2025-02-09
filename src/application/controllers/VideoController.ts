@@ -36,7 +36,7 @@ export class VideoController {
                     const video = new Video(null, file.originalname, file.path, file.mimetype);
                     
                     // Salvar e processar o vídeo
-                    const savedVideo = await this.videoUseCase.uploadAndSaveVideo(file.path, video, user.id);
+                    const savedVideo = await this.videoUseCase.uploadAndSaveVideo(file.path, video, user);
                     
                     uploadedVideos.push(savedVideo);
                 } catch (error) {
@@ -53,6 +53,9 @@ export class VideoController {
 
     async getAllVideos(req: Request, res: Response): Promise<void> {
         try {
+                
+            const user = await searchUser(1)
+            console.log(user)
             const videos = await this.videoUseCase.getAllVideos();
             res.status(200).json(videos);
         } catch (error) {

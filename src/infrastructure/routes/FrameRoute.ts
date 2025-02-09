@@ -5,6 +5,7 @@ import { FrameAdapter } from "@adapters/FrameAdapter";
 import { VideoAdapter } from "@adapters/VideoAdapter";
 import { S3Service } from "@external/s3/S3Service";
 import { MediaConvertService } from "@external/aws/MediaConvertService";
+import { EmailService } from "@external/email/EmailService";
 
 const router = express.Router();
 
@@ -13,8 +14,9 @@ const frameAdapter = new FrameAdapter();
 const videoAdapter = new VideoAdapter();
 const s3Service = new S3Service('fiap-video-frame');
 const mediaConvertService = new MediaConvertService();
+const emailService = new EmailService()
 
-const frameUseCase = new FrameUseCase(frameAdapter, videoAdapter, s3Service, mediaConvertService);
+const frameUseCase = new FrameUseCase(frameAdapter, videoAdapter, s3Service, mediaConvertService,emailService);
 
 
 const frameController = new FrameController(frameUseCase);
