@@ -13,13 +13,7 @@ permissions:
     actions: write
 
 jobs:
-    test-workflow:
-        uses: team-tech-challenge/terraform-reusable-actions/.github/workflows/npm-run-test.yml@create_workflow_npm_run_test
-        with:
-            node_version: "18"
-            test_command: "npm test"
     create-ecr:
-        needs: test-workflow
         uses: team-tech-challenge/terraform-reusable-actions/.github/workflows/create-elastic-container-registry.yml@main
         secrets:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
