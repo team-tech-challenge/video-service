@@ -12,7 +12,6 @@ COPY package.json .
 # Instala as dependências
 RUN npm install && npm run swagger
 
-RUN apt-get install -y ffmpeg
 
 # Stage 2: Run
 FROM node:19-alpine as runtime
