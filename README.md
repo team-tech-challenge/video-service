@@ -126,7 +126,30 @@ GET /videos
 GET /frames/video/:videoId
 ```
 
----
+## Evidência de Coverage do Projeto
+
+![Coverage](.github/code-coverage.png)
+
+## Arquitetura da aplicação
+
+![application-architecture](.github/application-architecture.png)
+
+## Arquitetura de referência
+
+![reference-architecture](.github/reference-architecture.png)
+
+## Topologia
+
+![topologia](.github/topologia.png)
+
+## Fluxo CI/CD
+
+![ci-cd](.github/ci-cd.png)
+
+## DDD
+
+![ddd](.github/ddd.png)
+
 ## 📩 Contato
 Caso tenha dúvidas ou sugestões, entre em contato pelo repositório!
 
