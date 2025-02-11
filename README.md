@@ -35,7 +35,7 @@ video-service
 │   ├── interfaces  # Gateways para interação entre camadas
 │   ├── types  # Definições de tipos para o TypeScript
 │── .env  # Configuração de variáveis de ambiente
-│── docker-compose.yml  # Configuração do Docker
+│── Dockerfile_node  # Configuração do Docker
 │── package.json  # Dependências do projeto
 │── README.md  # Documentação do projeto
 ```
@@ -56,7 +56,7 @@ video-service
 
 ### 📌 **Pré-requisitos**
 Antes de rodar o projeto, garanta que você tenha instalado:
-- **Docker** e **Docker Compose**
+- **Docker**
 - **Node.js** (versão LTS recomendada)
 - **AWS CLI** configurado (para serviços AWS)
 
@@ -75,9 +75,8 @@ APP_URL=http://localhost:3000
 
 ### 🚀 **Passo 2: Subir o serviço com Docker**
 ```sh
-docker-compose up --build
-```
-Isso iniciará o serviço junto com o banco de dados PostgreSQL.
+docker build -t video-service .
+docker run --env-file .env -p 3000:3000 video-service
 
 ### 🚀 **Passo 3: Rodar localmente (sem Docker)**
 Caso queira rodar manualmente sem Docker:
